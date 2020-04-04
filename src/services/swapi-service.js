@@ -6,7 +6,7 @@ export default class SwapiService {
         const res = await fetch(`${this._apiBase}${url}`);
 
         if (!res.ok) {
-            throw new Error(`Could not fetch ${url}` + `, received ${res.status}`)
+            throw new Error(`Could not fetch ${url}, received ${res.status}`)
         }
         return await res.json();
     }
@@ -16,6 +16,50 @@ export default class SwapiService {
     }
     getPerson(id) {
         return this.getResource(`/people/${id}/`)
+    }
+    async getAllPlanets() {
+        const res = await this.getResource(`/planets/`);
+        return res.results.map(this._transformPlanet);
+      }
+    
+      async getPlanet(id) {
+        const planet = await this.getResource(`/planets/${id}/`);
+        return this._transformPlanet(planet)
+      }
+    
+      async getAllStarships() {
+        const res = await this.getResource(`/starships/`);
+        return res.results;
+      }
+    
+      getStarship(id) {
+        return this.getResource(`/starships/${id}/`);
+      }
+
+      _extractId(item) {
+        const idRegExp = /\/([0-9]*)\/$/;
+        const id = item.url.match(idRegExp)[1];
+      }
+
+      _transformPlanet(planet) {
+
+          return {
+            id: this._extractId(planet),
+            name: planet.name,
+            population: planet.population,
+            rotationPeriod: planet.rotation_period,
+            diameter: planet.diameter
+          }
+      }
+
+      _transformPerson(person) {
+          return {
+          id: this._extractId(person),
+          name: person.name,
+          gender: person.gender,
+          birthYear: person.birthYear,
+          eyeColor: person.eyeColor
+      }
     }
 }
 
